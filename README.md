@@ -12,7 +12,7 @@ A simple, easy to use and configurable fast scroller for `RecyclerView`
 
 ## Adding the dependency
 ```groovy
-implementation 'implementation 'com.github.arguswaikhom:RecyclerView-FastScroller:Tag''
+implementation 'com.github.arguswaikhom:RecyclerView-FastScroller:Tag'
 ```
 or create your own version
 https://github.com/arguswaikhom/RecyclerView-FastScroller

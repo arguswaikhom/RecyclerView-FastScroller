@@ -12,8 +12,11 @@ A simple, easy to use and configurable fast scroller for `RecyclerView`
 
 ## Adding the dependency
 ```groovy
-implementation 'com.quiph.ui:recyclerviewfastscroller:1.0.0'
+implementation 'implementation 'com.github.arguswaikhom:RecyclerView-FastScroller:Tag''
 ```
+or create your own version
+https://github.com/arguswaikhom/RecyclerView-FastScroller
+
 ## Java-only project?
 As Kotlin compiles to Java, there's no need to externally add the Kotlin runtime or any other Kotlin dependencies when using this. Also the library is **100% compatible with Java** and requires **no migration** of the base project to Kotlin. 
 

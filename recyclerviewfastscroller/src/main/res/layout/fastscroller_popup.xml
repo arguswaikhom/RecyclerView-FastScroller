@@ -11,4 +11,4 @@
     android:padding="@dimen/default_popup_padding"
     android:scaleX="0"
     android:scaleY="0"
-    tools:text="A"></TextView>
+    tools:text="A" />

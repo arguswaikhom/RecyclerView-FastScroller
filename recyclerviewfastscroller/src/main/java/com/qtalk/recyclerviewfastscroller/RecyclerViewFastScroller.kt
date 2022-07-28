@@ -42,12 +42,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -576,7 +571,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 }
                 FastScrollDirection.VERTICAL -> {
                     handleImageView.x = 0F
-                    popupTextView.x = trackView.x - popupTextView.width
+                    popupTextView.x =
+                        if (Utils.isRTL(context)) trackView.x + trackView.width else trackView.x - popupTextView.width
                 }
             }
 

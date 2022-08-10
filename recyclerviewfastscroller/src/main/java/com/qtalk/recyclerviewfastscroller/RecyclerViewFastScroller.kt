@@ -238,6 +238,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     private var previousTotalVisibleItem: Int = 0
     private var hideHandleJob: Job? = null
 
+    private var handleToPopUpGapX: Int = 0
+        get() = if (Utils.isRTL(context)) field else field * -1
+
     private val trackLength: Float
         get() =
             when (fastScrollDirection) {
@@ -373,6 +376,10 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             handleSidePadding = attribs.getDimensionPixelSize(
                 R.styleable.RecyclerViewFastScroller_handleSidePadding,
                 loadDimenFromResource(Defaults.handleSidePadding)
+            )
+
+            handleToPopUpGapX = attribs.getInt(
+                R.styleable.RecyclerViewFastScroller_handleToPopUpGapX, 0
             )
 
             TextViewCompat.setTextAppearance(
@@ -571,11 +578,12 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 FastScrollDirection.HORIZONTAL -> {
                     handleImageView.y = 0F
                     popupTextView.y = trackView.y - popupTextView.height
+                    // TODO: RTL and handleAndPopupSpace support for horizontal scrolling
                 }
                 FastScrollDirection.VERTICAL -> {
                     handleImageView.x = 0F
                     popupTextView.x =
-                        if (Utils.isRTL(context)) trackView.x + trackView.width else trackView.x - popupTextView.width
+                        (if (Utils.isRTL(context)) trackView.x + trackView.width else trackView.x - popupTextView.width) + handleToPopUpGapX
                 }
             }
 
@@ -842,7 +850,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 state: RecyclerView.State
             ) {
                 super.getItemOffsets(outRect, view, parent, state)
-                if (parent.getChildAdapterPosition(view) == parent.adapter?.itemCount ?: 0 - 1) {
+                if (parent.getChildAdapterPosition(view) == (parent.adapter?.itemCount
+                        ?: (0 - 1))
+                ) {
                     val currentVisiblePos: Int =
                         (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
                     if (currentVisiblePos != RecyclerView.NO_POSITION) {

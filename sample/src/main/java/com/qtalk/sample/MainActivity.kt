@@ -26,6 +26,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         view_pager.adapter = ViewPagerAdapter(supportFragmentManager, this)
+
+        // To test RTL support
+//        val configuration: Configuration = resources.configuration
+//        configuration.setLayoutDirection(Locale("fa"))
+//        resources.updateConfiguration(configuration, resources.displayMetrics)
     }
 
     private class ViewPagerAdapter constructor(

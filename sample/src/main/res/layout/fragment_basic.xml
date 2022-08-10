@@ -8,8 +8,8 @@
         android:id="@+id/fastScroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:handleHeight="32dp"
-        app:handleWidth="@dimen/default_handle_size"
+        app:handleHeight="48dp"
+        app:handleWidth="12dp"
         app:supportSwipeToRefresh="true"
         app:handleVisibilityDuration="500">
 

@@ -118,6 +118,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         val popupDrawableInt: Int = R.drawable.custom_bg_primary
         val handleDrawableInt: Int = R.drawable.custom_bg_primary
         val handleSize: Int = R.dimen.default_handle_size
+        val handleSidePadding: Int = R.dimen.default_handle_side_padding
         val textStyle: Int = R.style.FastScrollerTextAppearance
         val popupPosition: PopupPosition = PopupPosition.BEFORE_TRACK
         val fastScrollDirection: FastScrollDirection = FastScrollDirection.VERTICAL
@@ -135,7 +136,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      * */
     var trackDrawable: Drawable?
         set(value) {
-            trackView.background = value
+            trackViewLine.background = value
         }
         get() = trackView.background
 
@@ -184,13 +185,15 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     var trackMarginStart: Int = 0
         set(value) {
             field = value
-            setTrackMargin()
+            setTrackMargin(trackView.layoutParams as MarginLayoutParams)
+            setTrackMargin(trackViewLine.layoutParams as MarginLayoutParams)
         }
 
     var trackMarginEnd: Int = 0
         set(value) {
             field = value
-            setTrackMargin()
+            setTrackMargin(trackView.layoutParams as MarginLayoutParams)
+            setTrackMargin(trackViewLine.layoutParams as MarginLayoutParams)
         }
 
     var fastScrollDirection: FastScrollDirection = Defaults.fastScrollDirection
@@ -204,10 +207,17 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             field = value
             refreshHandleImageViewSize()
         }
+
     var handleHeight: Int = LayoutParams.WRAP_CONTENT
         set(value) {
             field = value
             refreshHandleImageViewSize()
+        }
+
+    var handleSidePadding: Int = 0
+        set(value) {
+            field = value
+            alignTrackAndHandle()
         }
 
     /**
@@ -220,6 +230,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     private var hasEmptyItemDecorator: Boolean = Defaults.hasEmptyItemDecorator
     private lateinit var handleImageView: AppCompatImageView
     private lateinit var trackView: LinearLayout
+    private lateinit var trackViewLine: View
     private lateinit var recyclerView: RecyclerView
     private var popupAnimationRunnable: Runnable
     private var isEngaged: Boolean = false
@@ -307,7 +318,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 Defaults.hasEmptyItemDecorator
             )
 
-            trackView.background =
+            trackViewLine.background =
                 attribs.getDrawable(R.styleable.RecyclerViewFastScroller_trackDrawable)
 
             if (it.getBoolean(R.styleable.RecyclerViewFastScroller_supportSwipeToRefresh, false)) {
@@ -358,6 +369,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                     R.styleable.RecyclerViewFastScroller_trackMarginEnd,
                     Defaults.trackMargin
                 )
+
+            handleSidePadding = attribs.getDimensionPixelSize(
+                R.styleable.RecyclerViewFastScroller_handleSidePadding,
+                loadDimenFromResource(Defaults.handleSidePadding)
+            )
 
             TextViewCompat.setTextAppearance(
                 popupTextView,
@@ -503,10 +519,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             FastScrollDirection.HORIZONTAL ->
                                 it.addRule(ABOVE, trackView.id)
                             FastScrollDirection.VERTICAL -> {
-                                if (Build.VERSION.SDK_INT > 16)
-                                    it.addRule(START_OF, trackView.id)
-                                else
-                                    it.addRule(LEFT_OF, trackView.id)
+                                it.addRule(START_OF, trackView.id)
                             }
                         }
                     }
@@ -515,10 +528,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                             FastScrollDirection.HORIZONTAL ->
                                 it.addRule(BELOW, trackView.id)
                             FastScrollDirection.VERTICAL -> {
-                                if (Build.VERSION.SDK_INT > 16)
-                                    it.addRule(END_OF, trackView.id)
-                                else
-                                    it.addRule(RIGHT_OF, trackView.id)
+                                it.addRule(END_OF, trackView.id)
                             }
                         }
                     }
@@ -528,10 +538,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     }
 
     private fun alignTrackAndHandle() {
-        val padding = resources.getDimensionPixelOffset(R.dimen.default_handle_padding)
         when (fastScrollDirection) {
             FastScrollDirection.HORIZONTAL -> {
-                handleImageView.setPadding(0, padding, 0, padding)
+                handleImageView.setPadding(0, handleSidePadding, 0, handleSidePadding)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
@@ -542,24 +551,18 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 ).also { it.addRule(ALIGN_PARENT_BOTTOM) }
             }
             FastScrollDirection.VERTICAL -> {
-                handleImageView.setPadding(padding, 0, padding, 0)
+                handleImageView.setPadding(handleSidePadding, 0, handleSidePadding, 0)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
                 ).also {
-                    if (Build.VERSION.SDK_INT > 16)
-                        it.addRule(ALIGN_END, R.id.trackView)
-                    else
-                        it.addRule(ALIGN_RIGHT, R.id.trackView)
+                    it.addRule(ALIGN_END, R.id.trackView)
                 }
                 trackView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.MATCH_PARENT
                 ).also {
-                    if (Build.VERSION.SDK_INT > 16)
-                        it.addRule(ALIGN_PARENT_END)
-                    else
-                        it.addRule(ALIGN_PARENT_RIGHT)
+                    it.addRule(ALIGN_PARENT_END)
                 }
             }
         }
@@ -580,22 +583,23 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         }
     }
 
-    private fun setTrackMargin() {
-        with(trackView.layoutParams as MarginLayoutParams) {
+    private fun setTrackMargin(layoutParams: MarginLayoutParams) {
+        with(layoutParams) {
             when (fastScrollDirection) {
-                FastScrollDirection.HORIZONTAL ->
-                    if (Build.VERSION.SDK_INT > 16) {
-                        marginStart = trackMarginStart
-                        marginEnd = trackMarginEnd
-                    } else
-                        setMargins(trackMarginStart, 0, trackMarginEnd, 0)
-                FastScrollDirection.VERTICAL ->
+                FastScrollDirection.HORIZONTAL -> {
+                    marginStart = trackMarginStart
+                    marginEnd = trackMarginEnd
+                }
+                FastScrollDirection.VERTICAL -> {
                     setMargins(0, trackMarginStart, 0, trackMarginEnd)
+                }
             }
         }
     }
 
     private fun refreshHandleImageViewSize(newComputedSize: Int = -1) {
+        refreshTrackViewLineViewSize()
+
         // todo@shahsurajk add fork for horizontal layout
         if (newComputedSize == -1) {
             handleImageView.layoutParams = LinearLayout.LayoutParams(handleWidth, handleHeight)
@@ -604,10 +608,17 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         }
     }
 
+    private fun refreshTrackViewLineViewSize() {
+        val params = LayoutParams(handleWidth, LayoutParams.MATCH_PARENT)
+        params.addRule(ALIGN_PARENT_END)
+        trackViewLine.layoutParams = params
+    }
+
     private fun addThumbAndTrack() {
         View.inflate(context, R.layout.fastscroller_track_thumb, this)
         handleImageView = findViewById(R.id.thumbIV)
         trackView = findViewById(R.id.trackView)
+        trackViewLine = findViewById(R.id.trackViewLine)
     }
 
     private fun addPopupLayout() {
@@ -638,6 +649,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             hideHandleJob = CoroutineScope(Dispatchers.Main).launch {
                 delay(handleVisibilityDuration.toLong())
                 handleImageView.animateVisibility(false)
+                trackViewLine.animateVisibility(false)
             }
         }
 
@@ -685,16 +697,19 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
      *
      * @param makeVisible
      * */
-    private fun View.animateVisibility(makeVisible: Boolean = true) {
+    private fun View.animateVisibility(
+        makeVisible: Boolean = true,
+        duration: Long = Defaults.animationDuration
+    ) {
 
         val scaleFactor: Float = if (makeVisible) 1f else 0f
-        this.animate().scaleX(scaleFactor).setDuration(Defaults.animationDuration)
+        this.animate().scaleX(scaleFactor).setDuration(duration)
             .onAnimationCancelled {
-                this.animate().scaleX(scaleFactor).duration = Defaults.animationDuration
+                this.animate().scaleX(scaleFactor).duration = duration
             }
-        this.animate().scaleY(scaleFactor).setDuration(Defaults.animationDuration)
+        this.animate().scaleY(scaleFactor).setDuration(duration)
             .onAnimationCancelled {
-                this.animate().scaleY(scaleFactor).duration = Defaults.animationDuration
+                this.animate().scaleY(scaleFactor).duration = duration
             }
     }
 
@@ -889,11 +904,13 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
             // check if the layout is scrollable. i.e. range is large than extent, else disable fast scrolling and track touches.
             if (extent < range) {
+                trackViewLine.animateVisibility(duration = 0)
                 handleImageView.animateVisibility()
                 handleImageView.isEnabled = true
                 trackView.isEnabled = true
             } else {
                 handleImageView.animateVisibility(false)
+                trackViewLine.animateVisibility(false)
                 trackView.isEnabled = false
                 handleImageView.isEnabled = false
                 return

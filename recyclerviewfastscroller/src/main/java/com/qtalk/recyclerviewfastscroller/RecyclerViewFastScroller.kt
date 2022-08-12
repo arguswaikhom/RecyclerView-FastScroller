@@ -926,8 +926,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 return
             }
 
-            val error = extent.toFloat() * offset / range
-            val finalOffset: Float = (trackLength - handleLength) * ((error + offset) / range)
+            val hiddenLength = range - extent
+            val finalOffset: Float = (offset * (extent.toFloat() - handleLength)) / hiddenLength
 
             moveHandle(finalOffset)
         }

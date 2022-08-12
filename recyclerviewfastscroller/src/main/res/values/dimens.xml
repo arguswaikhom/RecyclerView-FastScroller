@@ -5,5 +5,6 @@
     <dimen name="default_handle_size">18dp</dimen>
     <dimen name="default_popup_padding">16dp</dimen>
 
+    <dimen name="default_expand_touch_area_by">0dp</dimen>
     <dimen name="default_handle_side_padding">0dp</dimen>
 </resources>

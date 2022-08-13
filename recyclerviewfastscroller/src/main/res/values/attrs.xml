@@ -22,9 +22,8 @@
 
         <attr name="trackMarginStart" format="dimension" />
         <attr name="trackMarginEnd" format="dimension" />
-        <attr name="handleSidePadding" format="dimension" />
-
-        <attr name="handleToPopUpGapX" format="integer" />
+        <attr name="expandTouchAreaBy" format="dimension" />
+        <attr name="handleToPopUpGapX" format="dimension" />
         <attr name="handleVisibilityDuration" format="integer" />
     </declare-styleable>
 </resources>

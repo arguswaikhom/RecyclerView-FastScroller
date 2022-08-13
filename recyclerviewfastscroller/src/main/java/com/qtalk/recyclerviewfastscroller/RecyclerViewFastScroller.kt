@@ -118,7 +118,8 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
         val popupDrawableInt: Int = R.drawable.custom_bg_primary
         val handleDrawableInt: Int = R.drawable.custom_bg_primary
         val handleSize: Int = R.dimen.default_handle_size
-        val handleSidePadding: Int = R.dimen.default_handle_side_padding
+        val expandTouchAreaBy: Int = R.dimen.default_expand_touch_area_by
+        val handleToPopupGapX: Int = R.dimen.default_handle_to_popup_gap_x
         val textStyle: Int = R.style.FastScrollerTextAppearance
         val popupPosition: PopupPosition = PopupPosition.BEFORE_TRACK
         val fastScrollDirection: FastScrollDirection = FastScrollDirection.VERTICAL
@@ -137,8 +138,9 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     var trackDrawable: Drawable?
         set(value) {
             trackViewLine.background = value
+            refreshHandleImageViewSize()
         }
-        get() = trackView.background
+        get() = trackViewLine.background
 
     /**
      * Sets background drawable to the [TextView] used in the popup
@@ -214,10 +216,28 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
             refreshHandleImageViewSize()
         }
 
-    var handleSidePadding: Int = 0
+    var handleLeftPadding: Int = 0
         set(value) {
             field = value
             alignTrackAndHandle()
+        }
+
+    var handleRightPadding: Int = 0
+        set(value) {
+            field = value
+            alignTrackAndHandle()
+        }
+
+    var expandTouchAreaBy: Int = 0
+        set(value) {
+            field = value
+            if (isRTL(context)) {
+                handleRightPadding = value
+                handleLeftPadding = 0
+            } else {
+                handleLeftPadding = value
+                handleRightPadding = 0
+            }
         }
 
     /**
@@ -239,7 +259,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     private var hideHandleJob: Job? = null
 
     private var handleToPopUpGapX: Int = 0
-        get() = if (Utils.isRTL(context)) field else field * -1
+        get() = if (isRTL(context)) field else field * -1
 
     private val trackLength: Float
         get() =
@@ -373,13 +393,14 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                     Defaults.trackMargin
                 )
 
-            handleSidePadding = attribs.getDimensionPixelSize(
-                R.styleable.RecyclerViewFastScroller_handleSidePadding,
-                loadDimenFromResource(Defaults.handleSidePadding)
+            expandTouchAreaBy = attribs.getDimensionPixelSize(
+                R.styleable.RecyclerViewFastScroller_expandTouchAreaBy,
+                loadDimenFromResource(Defaults.expandTouchAreaBy)
             )
 
-            handleToPopUpGapX = attribs.getInt(
-                R.styleable.RecyclerViewFastScroller_handleToPopUpGapX, 0
+            handleToPopUpGapX = attribs.getDimensionPixelSize(
+                R.styleable.RecyclerViewFastScroller_handleToPopUpGapX,
+                loadDimenFromResource(Defaults.handleToPopupGapX)
             )
 
             TextViewCompat.setTextAppearance(
@@ -547,7 +568,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
     private fun alignTrackAndHandle() {
         when (fastScrollDirection) {
             FastScrollDirection.HORIZONTAL -> {
-                handleImageView.setPadding(0, handleSidePadding, 0, handleSidePadding)
+                handleImageView.setPadding(0, handleLeftPadding, 0, handleRightPadding)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
@@ -558,7 +579,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 ).also { it.addRule(ALIGN_PARENT_BOTTOM) }
             }
             FastScrollDirection.VERTICAL -> {
-                handleImageView.setPadding(handleSidePadding, 0, handleSidePadding, 0)
+                handleImageView.setPadding(handleLeftPadding, 0, handleRightPadding, 0)
                 popupTextView.layoutParams = LayoutParams(
                     LayoutParams.WRAP_CONTENT,
                     LayoutParams.WRAP_CONTENT
@@ -582,8 +603,11 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 }
                 FastScrollDirection.VERTICAL -> {
                     handleImageView.x = 0F
-                    popupTextView.x =
-                        (if (Utils.isRTL(context)) trackView.x + trackView.width else trackView.x - popupTextView.width) + handleToPopUpGapX
+                    popupTextView.x = if (isRTL(context)) {
+                        trackViewLine.x + handleImageView.width - expandTouchAreaBy
+                    } else {
+                        trackViewLine.x - popupTextView.width
+                    } + handleToPopUpGapX
                 }
             }
 
@@ -610,7 +634,7 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
 
         // todo@shahsurajk add fork for horizontal layout
         if (newComputedSize == -1) {
-            handleImageView.layoutParams = LinearLayout.LayoutParams(handleWidth, handleHeight)
+            handleImageView.layoutParams = LinearLayout.LayoutParams(handleWidth + expandTouchAreaBy, handleHeight)
         } else {
             TODO("@shahsurajk dynamic sizing of handle")
         }

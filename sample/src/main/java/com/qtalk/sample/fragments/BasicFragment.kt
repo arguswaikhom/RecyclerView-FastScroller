@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.qtalk.sample.R
+import com.qtalk.sample.Utils
 import com.qtalk.sample.adapters.BasicAdapter
+import kotlinx.android.synthetic.main.fragment_basic.*
 import kotlinx.android.synthetic.main.fragment_basic.view.*
 import kotlinx.coroutines.*
 
@@ -47,6 +49,8 @@ class BasicFragment : Fragment() {
                 }
             }
         }
+
+        fastScroller.trackDrawable = Utils.drawRectDrawable(R.color.pinkLight, corner = 0f);
     }
 
     override fun onDestroyView() {

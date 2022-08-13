@@ -8,9 +8,11 @@
         android:id="@+id/fastScroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:expandTouchAreaBy="64dp"
         app:handleHeight="48dp"
+        app:handleToPopUpGapX="8dp"
         app:handleVisibilityDuration="500"
-        app:handleWidth="12dp"
+        app:handleWidth="18dp"
         app:supportSwipeToRefresh="true">
 
         <androidx.recyclerview.widget.RecyclerView

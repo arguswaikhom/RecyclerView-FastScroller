@@ -348,10 +348,6 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                 enableNestedScrolling()
             }
 
-            // align added layouts based on configurations in use.
-            alignTrackAndHandle()
-            alignPopupLayout()
-
             // if not defined, set default popupTextView background
             popupTextView.background =
                 if (attribs.hasValue(R.styleable.RecyclerViewFastScroller_popupDrawable)) {
@@ -410,6 +406,10 @@ class RecyclerViewFastScroller @JvmOverloads constructor(
                     Defaults.textStyle
                 )
             )
+
+            // align added layouts based on configurations in use.
+            alignTrackAndHandle()
+            alignPopupLayout()
 
             attribs.recycle()
         }
